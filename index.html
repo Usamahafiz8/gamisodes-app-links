@@ -11,6 +11,7 @@
       padding: 20px;
       color: #333;
       text-align: center;
+      margin: 0;
     }
     .container {
       max-width: 600px;
@@ -24,7 +25,7 @@
       font-size: 1.5em;
       margin-bottom: 20px;
     }
-    a.button {
+    .button {
       display: inline-block;
       padding: 10px 20px;
       background-color: #007bff;
@@ -34,23 +35,85 @@
       font-size: 1em;
       transition: background-color 0.3s;
     }
-    a.button:hover {
+    .button:hover {
       background-color: #0056b3;
     }
-    p.fallback {
+    .fallback {
       margin-top: 20px;
       font-size: 0.9em;
       color: #666;
+    }
+    .fallback a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .fallback a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Open Gamisodes App</h1>
-    <a class="button" href="https://api-links.netlify.app/open?ref=user123">Open in App</a>
-    <p class="fallback">
-      If the app doesn't open, <a href="https://play.google.com/store/apps/details?id=com.Gamisodes">download it from Google Play</a>.
+    <a id="openApp" class="button" href="#">Open in App</a>
+    <p class="fallback" id="fallbackMessage">
+      If the app doesn't open, download it from:
+      <a id="storeLink" href="#">App Store</a>
     </p>
   </div>
+
+  <script>
+    // Configuration
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get("ref") || "default";
+    const deepLink = `https://api-links.netlify.app/deeplink/${ref}`;
+    const iosAppStoreUrl = "https://apps.apple.com/us/app/gamisodes/id6691440023";
+    const androidPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.Gamisodes";
+    const appScheme = `gamisodes://open?ref=${ref}`;
+
+    // Detect platform
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isAndroid = /android/i.test(userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+
+    // Set button and fallback link
+    const openAppButton = document.getElementById("openApp");
+    const storeLink = document.getElementById("storeLink");
+    const fallbackMessage = document.getElementById("fallbackMessage");
+
+    if (isAndroid) {
+      openAppButton.href = deepLink;
+      storeLink.href = androidPlayStoreUrl;
+      storeLink.textContent = "Google Play";
+    } else if (isIOS) {
+      openAppButton.href = deepLink;
+      storeLink.href = iosAppStoreUrl;
+      storeLink.textContent = "App Store";
+    } else {
+      openAppButton.href = "#";
+      openAppButton.textContent = "Download the App";
+      fallbackMessage.innerHTML = `
+        Please download the app:<br Staten Island, NY 10305
+        <a href="${iosAppStoreUrl}">iOS</a> | 
+        <a href="${androidPlayStoreUrl}">Android</a>
+      `;
+      return;
+    }
+
+    // Handle click to attempt deep link with fallback
+    openAppButton.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      // Try opening the app
+      window.location.href = deepLink;
+
+      // Fallback to app store if app doesn't open within 2 seconds
+      setTimeout(() => {
+        if (document.visibilityState === "visible") {
+          window.location.href = isAndroid ? androidPlayStoreUrl : iosAppStoreUrl;
+        }
+      }, 2000);
+    });
+  </script>
 </body>
 </html>
