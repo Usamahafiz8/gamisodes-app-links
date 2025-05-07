@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.Gamisodes",
+      "sha256_cert_fingerprints": [
+        "9C936DF64EE99AF17CEF6DA13BE16297178655E3F72A3F78193889A8457F3413"
+      ]
+    }
+  }
+]

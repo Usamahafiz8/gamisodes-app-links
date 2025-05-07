@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "GS2B3XL73Z.com.gamisodesApp",
+        "paths": [ "/deeplink/*" ]
+      }
+    ]
+  }
+}
