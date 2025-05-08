@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,10 +9,8 @@
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
       const iosAppUri = "gamisodes://babyeinstein";
       const androidAppUri = "gamisodes://babyeinstein";
-      const iosAppStoreUrl = "https://apps.apple.com/us/app/gamisodes/id6691440023";
-      const androidPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.Gamisodes&referrer=babyeinstein";
-      const androidIntentUri = "market://details?id=com.Gamisodes&referrer=babyeinstein";
-      
+
+      // Determine page and set referrer dynamically
       const path = window.location.pathname.toLowerCase();
       let page = "organic";
       if (path.includes("babyeinstein")) page = "babyeinstein";
@@ -19,17 +18,28 @@
       else if (path.includes("inspectorgadget")) page = "inspectorgadget";
       console.log("Detected page:", page);
 
+      // URLs with dynamic referrer
+      const iosAppStoreUrl = "https://apps.apple.com/us/app/gamisodes/id6691440023";
+      const androidPlayStoreUrl = `https://play.google.com/store/apps/details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
+      const androidMarketUri = `market://details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
+      const androidIntentUri = `intent://details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}#Intent;scheme=market;package=com.android.vending;end`;
+
       // Android
       if (/android/i.test(userAgent)) {
         // Try to open the app
         window.location.href = androidAppUri;
-        
+
         // Fallback to Play Store
         setTimeout(function() {
-          window.location.href = androidIntentUri; // Try Play Store app
-          // Fallback to web URL if market:// fails
+          // First try market:// URI
+          window.location.href = androidMarketUri;
+          // Then try intent:// URI as a backup
           setTimeout(function() {
-            window.location.href = androidPlayStoreUrl;
+            window.location.href = androidIntentUri;
+            // Fallback to web URL if both fail
+            setTimeout(function() {
+              window.location.href = androidPlayStoreUrl;
+            }, 500);
           }, 500);
         }, 1500);
       }
