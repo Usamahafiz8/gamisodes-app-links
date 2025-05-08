@@ -1,20 +1,51 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Open Gamisodes</title>
+  <title>Open Gamisodes App</title>
   <script>
     window.onload = function () {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const iosAppUri = "gamisodes://babyeinstein";
+      const androidAppUri = "gamisodes://babyeinstein";
       const iosAppStoreUrl = "https://apps.apple.com/us/app/gamisodes/id6691440023";
       const androidPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.Gamisodes&referrer=babyeinstein";
+      const androidIntentUri = "market://details?id=com.Gamisodes&referrer=babyeinstein";
+      
+      const path = window.location.pathname.toLowerCase();
+      let page = "organic";
+      if (path.includes("babyeinstein")) page = "babyeinstein";
+      else if (path.includes("digdug")) page = "digdug";
+      else if (path.includes("inspectorgadget")) page = "inspectorgadget";
+      console.log("Detected page:", page);
+
+      // Android
       if (/android/i.test(userAgent)) {
-        window.location.href = androidPlayStoreUrl;
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        window.location.href = iosAppStoreUrl;
-      } else {
-        // For desktop or unsupported devices
+        // Try to open the app
+        window.location.href = androidAppUri;
+        
+        // Fallback to Play Store
+        setTimeout(function() {
+          window.location.href = androidIntentUri; // Try Play Store app
+          // Fallback to web URL if market:// fails
+          setTimeout(function() {
+            window.location.href = androidPlayStoreUrl;
+          }, 500);
+        }, 1500);
+      }
+      // iOS
+      else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        const start = Date.now();
+        window.location.href = iosAppUri;
+        // Fallback to App Store if app isn't opened
+        setTimeout(function() {
+          if (Date.now() - start < 1500) {
+            window.location.href = iosAppStoreUrl;
+          }
+        }, 1000);
+      }
+      // Other devices
+      else {
         document.getElementById("message").innerHTML =
           "<p>Please download the app:</p>" +
           "<a href='" + iosAppStoreUrl + "'>iOS</a> | " +
