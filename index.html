@@ -10,7 +10,7 @@
       const iosAppUri = "gamisodes://babyeinstein";
       const androidAppUri = "gamisodes://babyeinstein";
 
-      // Determine page for referrer
+      // Dynamic referrer based on path
       const path = window.location.pathname.toLowerCase();
       let page = "organic";
       if (path.includes("babyeinstein")) page = "babyeinstein";
@@ -18,43 +18,48 @@
       else if (path.includes("inspectorgadget")) page = "inspectorgadget";
       console.log("Detected page:", page);
 
-      // URLs with dynamic referrer
+      // URLs
       const iosAppStoreUrl = "https://apps.apple.com/us/app/gamisodes/id6691440023";
       const androidPlayStoreUrl = `https://play.google.com/store/apps/details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
       const androidMarketUri = `market://details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
 
-      // Android
+      // Android flow
       if (/android/i.test(userAgent)) {
-        console.log("Attempting to open app: ", androidAppUri);
+        console.log("Android device: opening app URI...");
         window.location.href = androidAppUri;
 
-        // Fallback to Play Store
-        setTimeout(function() {
-          console.log("Trying market:// URI: ", androidMarketUri);
-          // Use window.location.href to force Play Store app
+        setTimeout(() => {
+          console.log("Trying market URI...");
           window.location.href = androidMarketUri;
-          // Fallback to web URL only if market:// fails
-          setTimeout(function() {
-            console.log("Falling back to web URL: ", androidPlayStoreUrl);
+
+          setTimeout(() => {
+            console.log("Fallback to Play Store web URL...");
             window.location.href = androidPlayStoreUrl;
-          }, 1000); // Increased to 1s for reliability
-        }, 2000); // Increased to 2s to give app time to open
+          }, 1000); // fallback after 1s
+        }, 2000); // allow app to open first
       }
-      // iOS
+      // iOS flow
       else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        console.log("Attempting to open iOS app: ", iosAppUri);
-        const start = Date.now();
-        window.location.href = iosAppUri;
-        setTimeout(function() {
-          if (Date.now() - start < 1500) {
-            console.log("Falling back to App Store: ", iosAppStoreUrl);
+        console.log("iOS device: attempting to open app...");
+
+        const now = Date.now();
+
+        // Create hidden iframe to attempt deep link
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = iosAppUri;
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+          if (Date.now() - now < 1600) {
+            console.log("Fallback to App Store...");
             window.location.href = iosAppStoreUrl;
           }
         }, 1000);
       }
-      // Other devices
+      // Fallback for unsupported or desktop
       else {
-        console.log("Non-mobile device, showing manual links");
+        console.log("Unsupported device or desktop: showing manual download links.");
         document.getElementById("message").innerHTML =
           "<p>Please download the app:</p>" +
           "<a href='" + iosAppStoreUrl + "'>iOS</a> | " +
