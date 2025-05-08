@@ -10,7 +10,7 @@
       const iosAppUri = "gamisodes://babyeinstein";
       const androidAppUri = "gamisodes://babyeinstein";
 
-      // Determine page and set referrer dynamically
+      // Determine page for referrer
       const path = window.location.pathname.toLowerCase();
       let page = "organic";
       if (path.includes("babyeinstein")) page = "babyeinstein";
@@ -23,39 +23,49 @@
       const androidPlayStoreUrl = `https://play.google.com/store/apps/details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
       const androidMarketUri = `market://details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}`;
       const androidIntentUri = `intent://details?id=com.Gamisodes&referrer=${encodeURIComponent(page)}#Intent;scheme=market;package=com.android.vending;end`;
+      const androidUtmUri = `market://details?id=com.Gamisodes&referrer=utm_campaign%3D${encodeURIComponent(page)}`;
 
       // Android
       if (/android/i.test(userAgent)) {
-        // Try to open the app
+        console.log("Attempting to open app: ", androidAppUri);
         window.location.href = androidAppUri;
 
         // Fallback to Play Store
         setTimeout(function() {
-          // First try market:// URI
+          console.log("Trying market:// URI: ", androidMarketUri);
           window.location.href = androidMarketUri;
-          // Then try intent:// URI as a backup
+          // Try UTM-style referrer
           setTimeout(function() {
-            window.location.href = androidIntentUri;
-            // Fallback to web URL if both fail
+            console.log("Trying UTM market:// URI: ", androidUtmUri);
+            window.location.href = androidUtmUri;
+            // Try intent:// URI
             setTimeout(function() {
-              window.location.href = androidPlayStoreUrl;
+              console.log("Trying intent:// URI: ", androidIntentUri);
+              window.location.href = androidIntentUri;
+              // Fallback to web URL
+              setTimeout(function() {
+                console.log("Falling back to web URL: ", androidPlayStoreUrl);
+                window.location.href = androidPlayStoreUrl;
+              }, 500);
             }, 500);
           }, 500);
         }, 1500);
       }
       // iOS
       else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        console.log("Attempting to open iOS app: ", iosAppUri);
         const start = Date.now();
         window.location.href = iosAppUri;
-        // Fallback to App Store if app isn't opened
         setTimeout(function() {
           if (Date.now() - start < 1500) {
+            console.log("Falling back to App Store: ", iosAppStoreUrl);
             window.location.href = iosAppStoreUrl;
           }
         }, 1000);
       }
       // Other devices
       else {
+        console.log("Non-mobile device, showing manual links");
         document.getElementById("message").innerHTML =
           "<p>Please download the app:</p>" +
           "<a href='" + iosAppStoreUrl + "'>iOS</a> | " +
